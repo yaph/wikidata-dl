@@ -8,7 +8,7 @@ from wikidata_dl import __author__, __email__, __version__
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-requirements = ['requests', 'wptools']
+requirements = ['python-dateutil', 'requests', 'wptools']
 
 setup_requirements = ['pytest-runner']
 
@@ -45,6 +45,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/yaph/wikidata-dl',
-    version=wikidata_dl.__version__,
+    version=__version__,
     zip_safe=False,
 )
