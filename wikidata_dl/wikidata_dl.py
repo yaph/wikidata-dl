@@ -31,7 +31,7 @@ def get_wikibase_ids(query):
         raise Exception('Data could not be fetched.')
 
 
-def download(wikibase_ids, cache_dir='wikidata'):
+def download(wikibase_ids, cache_dir):
     """Fetch and cache data for all Wikibase IDs passed to this function."""
 
     if not os.path.exists(cache_dir):
