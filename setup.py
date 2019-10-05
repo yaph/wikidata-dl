@@ -38,6 +38,7 @@ setup(
     install_requires=requirements,
     license='MIT license',
     long_description=readme,
+    long_description_content_type='text/markdown',
     include_package_data=True,
     keywords='wikidata, download, dl, command line, cli, sparql',
     name='wikidata_dl',
