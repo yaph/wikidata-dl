@@ -32,8 +32,7 @@ def get_wikibase_ids(query):
 def download(wikibase_ids, cache_dir, cache_lifetime):
     """Fetch and cache data for all Wikibase IDs passed to this function."""
 
-    if not os.path.exists(cache_dir):
-        os.makedirs(cache_dir, exist_ok=True)
+    os.makedirs(cache_dir, exist_ok=True)
 
     for count, wikibase in enumerate(wikibase_ids):
         file_name = os.path.join(cache_dir, wikibase + '.json')
