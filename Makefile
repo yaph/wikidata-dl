@@ -21,7 +21,8 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
-lint: ## check style with flake8
+check-code:
+	mypy wikidata_dl/wikidata_dl.py
 	flake8 wikidata_dl tests
 
 test: ## run tests quickly with the default Python

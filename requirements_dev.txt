@@ -4,6 +4,7 @@ flake8
 tox
 coverage
 twine
+mypy
 
 pytest
 pytest-runner

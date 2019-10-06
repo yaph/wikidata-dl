@@ -5,10 +5,10 @@ import os
 import time
 
 import requests
-import wptools
+import wptools  # type: ignore
 
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Set
 
 from dateutil.parser import parse as parsedate
 
@@ -16,7 +16,7 @@ from dateutil.parser import parse as parsedate
 logging.basicConfig(filename='wikidata.log', level=logging.WARNING)
 
 
-def get_wikibase_ids(query: str) -> List[str]:
+def get_wikibase_ids(query: str) -> Set[str]:
     """Return a set of Wikibase IDs for given query from Wikidata."""
 
     params = {
@@ -42,12 +42,12 @@ def is_cached(file_name: str, cache_lifetime: int) -> bool:
     return False
 
 
-def is_wikidata_newer(file_name: str, page: dict) -> bool:
+def is_wikidata_newer(file_name: str, data: dict) -> bool:
     """Check whether last Wikidata update is newer than cache file."""
 
     if os.path.exists(file_name):
         file_modified = os.path.getmtime(file_name)
-        if datetime.fromtimestamp(file_modified, tz=timezone.utc) > parsedate(page.data['modified']['wikidata']):
+        if datetime.fromtimestamp(file_modified, tz=timezone.utc) > parsedate(data['modified']['wikidata']):
             logging.info(f'Last wikidata update older than {file_name}.')
             return False
     return True
@@ -70,7 +70,7 @@ def download(wikibase_ids: List[str], cache_dir: str, cache_lifetime: int) -> No
         page.get_wikidata()
 
         # Continue if last Wikidata update is older than last modification of JSON file
-        if is_wikidata_newer(file_name, page):
+        if is_wikidata_newer(file_name, page.data):
             continue
 
         # Make a copy to keep original values in case of redirects
@@ -94,7 +94,8 @@ def download(wikibase_ids: List[str], cache_dir: str, cache_lifetime: int) -> No
             logging.error(f'Wikipedia summary for {page.data["title"]} could not be fetched.')
 
         # In case of redirects or disambiguation pages returned from restbase request keep data from wikidata request
-        if wikibase == page.data['wikibase'] and page.data['description'] and not page.data['description'].startswith('Disambiguation page'):
+        desc = page.data['description']
+        if wikibase == page.data['wikibase'] and desc and not desc.startswith('Disambiguation page'):
             wikidata.update(page.data)
 
         logging.info(f'Write data to {file_name}.')
