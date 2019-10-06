@@ -11,8 +11,6 @@ from datetime import datetime, timezone
 from dateutil.parser import parse as parsedate
 
 
-CACHE_LIFETIME = 3600 * 24 * 30
-
 logging.basicConfig(filename='wikidata.log', level=logging.WARNING)
 
 
@@ -31,7 +29,7 @@ def get_wikibase_ids(query):
         raise Exception('Data could not be fetched.')
 
 
-def download(wikibase_ids, cache_dir):
+def download(wikibase_ids, cache_dir, cache_lifetime):
     """Fetch and cache data for all Wikibase IDs passed to this function."""
 
     if not os.path.exists(cache_dir):
@@ -42,7 +40,7 @@ def download(wikibase_ids, cache_dir):
         file_modified = None
         if os.path.exists(file_name):
             file_modified = os.path.getmtime(file_name)
-            if (time.time() - file_modified < CACHE_LIFETIME):
+            if (time.time() - file_modified < cache_lifetime):
                 logging.info(f'Cached file {file_name} is still valid.')
                 continue
 
