@@ -8,7 +8,7 @@ import requests
 import wptools  # type: ignore
 
 from datetime import datetime, timezone
-from typing import List, Set
+from typing import Set
 
 from dateutil.parser import parse as parsedate
 
@@ -53,7 +53,7 @@ def is_wikidata_newer(file_name: str, data: dict) -> bool:
     return True
 
 
-def download(wikibase_ids: List[str], cache_dir: str, cache_lifetime: int) -> None:
+def download(wikibase_ids: Set[str], cache_dir: str, cache_lifetime: int) -> None:
     """Fetch and cache data for all Wikibase IDs passed to this function."""
 
     os.makedirs(cache_dir, exist_ok=True)
@@ -63,14 +63,13 @@ def download(wikibase_ids: List[str], cache_dir: str, cache_lifetime: int) -> No
         if is_cached(file_name, cache_lifetime):
             continue
 
+        # Fetch Wikidata
         wikidata_url = 'https://www.wikidata.org/wiki/' + wikibase
-
         print(f'{count + 1:>5}\tGet data for: {wikidata_url}')
         page = wptools.page(wikibase=wikibase, silent=True, verbose=False)
         page.get_wikidata()
 
-        # Continue if last Wikidata update is older than last modification of JSON file
-        if is_wikidata_newer(file_name, page.data):
+        if not is_wikidata_newer(file_name, page.data):
             continue
 
         # Make a copy to keep original values in case of redirects
@@ -83,11 +82,9 @@ def download(wikibase_ids: List[str], cache_dir: str, cache_lifetime: int) -> No
 
         # Add sitelinks to data
         response = json.loads(page.cache['wikidata']['response'])
-        item = response['entities'][wikibase]
-        sitelinks = item.get('sitelinks')
-        if sitelinks:
-            wikidata['sitelinks'] = sitelinks
+        wikidata['sitelinks'] = response['entities'][wikibase].get('sitelinks')
 
+        # Load summary from Wikipedia
         try:
             page.get_restbase('/page/summary/')
         except LookupError:
