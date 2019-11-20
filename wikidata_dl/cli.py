@@ -13,7 +13,8 @@ def main():
                         help='The directory where Wikidata files are stored.')
     parser.add_argument('--cache-lifetime', '-l', default=2592000, type=int,
                         help='Cache lifetime in seconds, set to 30 days by default.')
-    parser.add_argument('--dry-run', '-n', action='store_true', help='Run the query and print the result count.')
+    parser.add_argument('--dry-run', '-n', action='store_true',
+                        help='Run the query and print the result count without downloading any data.')
     args = parser.parse_args()
 
     wikibase_ids = get_wikibase_ids(args.query_file.read())
