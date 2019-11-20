@@ -10,7 +10,17 @@
 
 ## Usage
 
+Download all results returned by the query and store them in the `wikidata` directory in the current working directory:
+
     wikidata-dl /path/to/my-query.sparql
+
+Show only the result count returned by the query without downloading anything:
+
+    wikidata-dl --dry-run /path/to/my-query.sparql
+
+For a complete reference of the command line options run:
+
+    wikidata-dl --help
 
 ## Sample Query
 
