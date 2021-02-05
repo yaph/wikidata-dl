@@ -67,7 +67,12 @@ def download(wikibase_ids: Set[str], cache_dir: str, cache_lifetime: int) -> Non
         wikidata_url = 'https://www.wikidata.org/wiki/' + wikibase
         print(f'{count + 1:>5}\tGet data for: {wikidata_url}')
         page = wptools.page(wikibase=wikibase, silent=True, verbose=False)
-        page.get_wikidata()
+
+        try:
+            page.get_wikidata()
+        except LookupError:
+            logging.error(f'Wikidata for {wikibase} could not be fetched.')
+            continue
 
         if not is_wikidata_newer(file_name, page.data):
             continue

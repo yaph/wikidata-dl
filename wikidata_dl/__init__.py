@@ -2,4 +2,4 @@
 
 __author__ = 'Ramiro Gómez'
 __email__ = 'code@ramiro.org'
-__version__ = '2019.11.20'
+__version__ = '2021.02.05'
