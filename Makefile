@@ -35,8 +35,12 @@ coverage: ## check code coverage quickly with the default Python
 	coverage run --source wikidata_dl -m pytest
 	coverage report -m
 
-release: dist ## package and upload a release
+# Call example: make release version=2021.02.05
+release: dist
+	git tag -a $(version) -m 'Create version $(version)'
+	git push --tags
 	twine upload dist/*
+
 
 dist: clean ## builds source and wheel package
 	python setup.py sdist
