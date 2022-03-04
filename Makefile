@@ -35,7 +35,7 @@ coverage: ## check code coverage quickly with the default Python
 	coverage run --source wikidata_dl -m pytest
 	coverage report -m
 
-# Call example: make release version=2021.02.05
+# Call example: make release version=2022.03.04
 release: dist
 	git tag -a $(version) -m 'Create version $(version)'
 	git push --tags
