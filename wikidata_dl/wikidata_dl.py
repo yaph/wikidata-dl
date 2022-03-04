@@ -70,8 +70,8 @@ def download(wikibase_ids: Set[str], cache_dir: str, cache_lifetime: int) -> Non
 
         try:
             page.get_wikidata()
-        except LookupError:
-            logging.error(f'Wikidata for {wikibase} could not be fetched.')
+        except (LookupError, ValueError) as err:
+            logging.error(f'Wikidata for {wikibase} could not be fetched.\n{err}')
             continue
 
         if not is_wikidata_newer(file_name, page.data):
