@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import argparse
 
-from .wikidata_dl import get_wikibase_ids, download
+from wikidata_dl import get_wikibase_ids, download
 
 
 def main():

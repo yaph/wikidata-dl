@@ -4,7 +4,7 @@ import logging
 import os
 import time
 
-import requests
+import httpx
 import wptools  # type: ignore
 
 from datetime import datetime, timezone
@@ -23,8 +23,8 @@ def get_wikibase_ids(query: str) -> Set[str]:
         'query': query,
         'format': 'json'
     }
-    resp = requests.get('https://query.wikidata.org/sparql', params=params)
-    if resp.ok:
+    resp = httpx.get('https://query.wikidata.org/sparql', params=params)
+    if resp.is_success:
         results = resp.json()
         return {r['item']['value'].split('/')[-1] for r in results['results']['bindings']}
     else:
