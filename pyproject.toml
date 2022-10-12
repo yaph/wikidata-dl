@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "wikidata_dl"
 description = 'Download data from Wikidata based on input SPARQL query.'
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 license = "MIT"
 authors = [
   { name = "Ramiro Gómez", email = "code@ramiro.org" },
@@ -14,9 +14,6 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: Implementation :: CPython",
@@ -60,10 +57,13 @@ dependencies = [
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=wikidata-dl --cov=tests"
 no-cov = "cov --no-cov"
-svg2png = "mogrify -format png -path tests/images images/*.svg"
+qa = "flake8 wikidata_dl tests"
+testcli = "wikidata_dl/cli.py tests/queries/continents-on-earth.sparql"
+typecheck = "mypy wikidata_dl/wikidata_dl.py"
+
 
 [[tool.hatch.envs.test.matrix]]
-python = ["37", "38", "39", "310", "311"]
+python = ["310", "311"]
 
 [tool.coverage.run]
 branch = true

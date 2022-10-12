@@ -4,31 +4,24 @@ import logging
 import os
 import time
 
-import httpx
 import wptools  # type: ignore
+
+import wikidata
 
 from datetime import datetime, timezone
 from typing import Set
 
-from dateutil.parser import parse as parsedate
+from dateutil.parser import parse as parsedate  # type: ignore
 
 
 logging.basicConfig(filename='wikidata.log', level=logging.WARNING)
 
 
-def get_wikibase_ids(query: str) -> Set[str]:
+def get_wikibase_ids(records: list) -> Set[str]:
     """Return a set of Wikibase IDs for given query from Wikidata."""
 
-    params = {
-        'query': query,
-        'format': 'json'
-    }
-    resp = httpx.get('https://query.wikidata.org/sparql', params=params)
-    if resp.is_success:
-        results = resp.json()
-        return {r['item']['value'].split('/')[-1] for r in results['results']['bindings']}
-    else:
-        raise Exception('Data could not be fetched.')
+    breakpoint()
+    return {wikidata.wikibase_id(r) for r in records}
 
 
 def is_cached(file_name: str, cache_lifetime: int) -> bool:
