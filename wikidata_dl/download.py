@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
-import os
 import time
 
 import wptools  # type: ignore
 
+from pathlib import Path
 from datetime import datetime, timezone
-from typing import Set
 
 from dateutil.parser import parse as parsedate  # type: ignore
 
@@ -15,77 +14,63 @@ from dateutil.parser import parse as parsedate  # type: ignore
 logging.basicConfig(filename='wikidata.log', level=logging.WARNING)
 
 
-def is_cached(file_name: str, cache_lifetime: int) -> bool:
-    """Check whether cache file exists is still valid."""
-
-    if os.path.exists(file_name):
-        file_modified = os.path.getmtime(file_name)
-        if (time.time() - file_modified < cache_lifetime):
-            logging.info(f'Cached file {file_name} is still valid.')
-            return True
-    return False
-
-
-def is_outdated(file_name: str, data: dict) -> bool:
+def is_current(mtime: float, data: dict) -> bool:
     """Check whether last Wikidata update is newer than cache file."""
 
-    if os.path.exists(file_name):
-        file_modified = os.path.getmtime(file_name)
-        if datetime.fromtimestamp(file_modified, tz=timezone.utc) > parsedate(data['modified']['wikidata']):
-            logging.info(f'Last wikidata update older than {file_name}.')
-            return False
-    return True
+    return datetime.fromtimestamp(mtime, tz=timezone.utc) > parsedate(data['modified']['wikidata'])
 
 
-def download(wikibase_ids: Set[str], cache_dir: str, cache_lifetime: int) -> None:
+def download(wikibase_id: str, root: str, lifetime: int) -> None:
     """Fetch and cache data for all Wikibase IDs passed to this function."""
 
-    os.makedirs(cache_dir, exist_ok=True)
+    p_dir = Path(root)
+    p_dir.mkdir(exist_ok=True, parents=True)
 
-    for count, wikibase in enumerate(wikibase_ids):
-        file_name = os.path.join(cache_dir, wikibase + '.json')
-        if is_cached(file_name, cache_lifetime):
-            continue
+    p_file = p_dir.joinpath(wikibase_id + '.json')
+    mtime = p_file.lstat().st_mtime if p_file.exists() else None
 
-        # Fetch Wikidata
-        wikidata_url = 'https://www.wikidata.org/wiki/' + wikibase
-        print(f'{count + 1:>5}\tGet data for: {wikidata_url}')
-        page = wptools.page(wikibase=wikibase, silent=True, verbose=False)
+    if mtime and (mtime - p_file.lstat().st_mtime < lifetime):
+        logging.info(f'Cached file {p_file} is still valid.')
+        return
 
-        try:
-            page.get_wikidata()
-        except (LookupError, ValueError) as err:
-            logging.error(f'Wikidata for {wikibase} could not be fetched.\n{err}')
-            continue
+    # Fetch Wikidata
+    wikidata_url = 'https://www.wikidata.org/wiki/' + wikibase_id
+    page = wptools.page(wikibase=wikibase_id, silent=True, verbose=False)
 
-        if not is_outdated(file_name, page.data):
-            continue
+    try:
+        page.get_wikidata()
+    except (LookupError, ValueError) as err:
+        logging.error(f'Wikidata for {wikibase_id} could not be fetched.\n{err}')
+        return
 
-        # Make a copy to keep original values in case of redirects
-        wikidata = page.data.copy()
+    if mtime and is_current(mtime, page.data):
+        logging.info(f'Last wikidata update older than {p_file}.')
+        return
 
-        # Only consider items that have an English label
-        if not wikidata['label']:
-            logging.warning(wikidata_url + ' has no English label.')
-            continue
+    # Make a copy to keep original values in case of redirects
+    wikidata = page.data.copy()
 
-        # Add sitelinks to data
-        response = json.loads(page.cache['wikidata']['response'])
-        wikidata['sitelinks'] = response['entities'][wikibase].get('sitelinks')
+    # Only consider items that have an English label
+    if not wikidata['label']:
+        logging.warning(wikidata_url + ' has no English label.')
+        return
 
-        # Load summary from Wikipedia
-        try:
-            page.get_restbase('/page/summary/')
-        except LookupError:
-            logging.error(f'Wikipedia summary for {page.data["title"]} could not be fetched.')
+    # Add sitelinks to data
+    response = json.loads(page.cache['wikidata']['response'])
+    wikidata['sitelinks'] = response['entities'][wikibase_id].get('sitelinks')
 
-        # In case of redirects or disambiguation pages returned from restbase request keep data from wikidata request
-        desc = page.data['description']
-        if wikibase == page.data['wikibase'] and desc and not desc.startswith('Disambiguation page'):
-            wikidata.update(page.data)
+    # Load summary from Wikipedia
+    try:
+        page.get_restbase('/page/summary/')
+    except LookupError:
+        logging.error(f'Wikipedia summary for {page.data["title"]} could not be fetched.')
 
-        logging.info(f'Write data to {file_name}.')
-        with open(file_name, 'w') as f:
-            json.dump(wikidata, f)
+    # In case of redirects or disambiguation pages returned from restbase request keep data from wikidata request
+    desc = page.data['description']
+    if wikibase_id == page.data['wikibase'] and desc and not desc.startswith('Disambiguation page'):
+        wikidata.update(page.data)
 
-        time.sleep(1)
+    logging.info(f'Write data to {p_file}.')
+    p_file.write_text(json.dumps(wikidata))
+
+    time.sleep(1)

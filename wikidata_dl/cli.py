@@ -24,20 +24,23 @@ def main():
                         help='Download format, defaults to csv.')
     parser.add_argument('--items', '-i', action='store_true',
                         help='Download Wikidata items as individual JSON files.')
-    cli_args = parser.parse_args()
+    argv = parser.parse_args()
 
     # Get and save result
-    result = wikidata.get(cli_args.query_file.read(), cli_args.format)
-    file_name = f'{Path(cli_args.query_file.name).stem}.{cli_args.format}'
-    Path(cli_args.cache_dir).joinpath(file_name).write_text(result)
+    result = wikidata.get(argv.query_file.read(), argv.format)
+    file_name = f'{Path(argv.query_file.name).stem}.{argv.format}'
+    Path(argv.cache_dir).joinpath(file_name).write_text(result)
 
-    if not cli_args.items:
+    if not argv.items:
         exit()
 
     # Download individual items as JSON files.
-    for record in wikidata.records(result, cli_args.format):
-        wikibase_ids = wikidata.wikibase_ids(record)
-        download(wikibase_ids, cache_dir=cli_args.cache_dir, cache_lifetime=cli_args.cache_lifetime)
+    count = 0
+    for record in wikidata.records(result, argv.format):
+        for wid in wikidata.wikibase_ids(record):
+            count += 1
+            print(f'{count:>5}\tProcess Wikidata item: {wid}')
+            download(wid, root=argv.cache_dir, lifetime=argv.cache_lifetime)
 
 
 if __name__ == '__main__':
