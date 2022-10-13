@@ -6,7 +6,7 @@
 
 ## Installation
 
-    pip install wikidata_dl
+    pip install wikidata-dl
 
 ## Usage
 
