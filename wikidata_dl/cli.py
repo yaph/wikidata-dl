@@ -5,8 +5,9 @@ import argparse
 import wikidata
 
 from pathlib import Path
+from sys import exit
 
-from wikidata_dl import get_wikibase_ids, download
+from wikidata_dl import download
 
 
 def main():
@@ -25,21 +26,18 @@ def main():
                         help='Download Wikidata items as individual JSON files.')
     cli_args = parser.parse_args()
 
+    # Get and save result
     result = wikidata.get(cli_args.query_file.read(), cli_args.format)
-
-    # Save result
     file_name = f'{Path(cli_args.query_file.name).stem}.{cli_args.format}'
     Path(cli_args.cache_dir).joinpath(file_name).write_text(result)
 
-    breakpoint()
-    records = wikidata.records(result)
-    wikibase_ids = get_wikibase_ids(records)
-    print('Number of results returned by query:', len(wikibase_ids))
+    if not cli_args.items:
+        exit()
 
-    if cli_args.dry_run:
-        return
-
-    download(wikibase_ids, cache_dir=cli_args.cache_dir, cache_lifetime=cli_args.cache_lifetime)
+    # Download individual items as JSON files.
+    for record in wikidata.records(result, cli_args.format):
+        wikibase_ids = wikidata.wikibase_ids(record)
+        download(wikibase_ids, cache_dir=cli_args.cache_dir, cache_lifetime=cli_args.cache_lifetime)
 
 
 if __name__ == '__main__':

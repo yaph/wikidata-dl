@@ -6,8 +6,6 @@ import time
 
 import wptools  # type: ignore
 
-import wikidata
-
 from datetime import datetime, timezone
 from typing import Set
 
@@ -15,13 +13,6 @@ from dateutil.parser import parse as parsedate  # type: ignore
 
 
 logging.basicConfig(filename='wikidata.log', level=logging.WARNING)
-
-
-def get_wikibase_ids(records: list) -> Set[str]:
-    """Return a set of Wikibase IDs for given query from Wikidata."""
-
-    breakpoint()
-    return {wikidata.wikibase_id(r) for r in records}
 
 
 def is_cached(file_name: str, cache_lifetime: int) -> bool:
@@ -35,7 +26,7 @@ def is_cached(file_name: str, cache_lifetime: int) -> bool:
     return False
 
 
-def is_wikidata_newer(file_name: str, data: dict) -> bool:
+def is_outdated(file_name: str, data: dict) -> bool:
     """Check whether last Wikidata update is newer than cache file."""
 
     if os.path.exists(file_name):
@@ -67,7 +58,7 @@ def download(wikibase_ids: Set[str], cache_dir: str, cache_lifetime: int) -> Non
             logging.error(f'Wikidata for {wikibase} could not be fetched.\n{err}')
             continue
 
-        if not is_wikidata_newer(file_name, page.data):
+        if not is_outdated(file_name, page.data):
             continue
 
         # Make a copy to keep original values in case of redirects

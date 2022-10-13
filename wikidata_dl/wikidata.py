@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from email import header
+import csv
+import json
+
 import httpx
 
 import vocabulary
@@ -28,24 +30,20 @@ def get(query: str, format: str) -> dict:
     raise Exception('Data could not be fetched.')
 
 
-def records(result: str) -> Iterator[dict]:
-    """Yield Wikidata item records from the query result."""
+def records(result: str, format: str) -> Iterator[list]:
+    """Yield Wikidata item values from the query result."""
 
-    for rec in result['results']['bindings']:
-        for prop in result['head']['vars']:
-            obj = rec.get(prop, {})
-            val = obj.get('value')
-
-            match obj.get('datatype'):
-                case vocabulary.XSD_DECIMAL | vocabulary.XSD_DOUBLE | vocabulary.XSD_INT:
-                    val = int(val)
-
-            yield {prop: val}
+    if 'csv' == format:
+        # Ignore first line with column headings
+        for record in csv.reader(result.splitlines()[1:]):
+            yield record
+    elif 'json' == format:
+        for obj in json.loads(result)['results']['bindings']:
+            yield [x['value'] for x in obj.values()]
 
 
-def wikibase_id(record: dict) -> str:
-    """Return the Wikibase ID from the given record."""
+def wikibase_ids(values: list) -> str:
+    """Return Wikibase IDs from the given record."""
 
-    for val in record.values():
-        if isinstance(val, str) and val.startswith(vocabulary.PREFIX_WIKIDATA_ENTITY + 'Q'):
-            return val.split('/')[-1]
+    return [v.split('/')[-1] for v in values
+            if isinstance(v, str) and v.startswith(vocabulary.PREFIX_WIKIDATA_ENTITY + 'Q')]
