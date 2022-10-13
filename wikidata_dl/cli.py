@@ -7,7 +7,7 @@ import wikidata
 from pathlib import Path
 from sys import exit
 
-from wikidata_dl import download
+from download import download
 
 
 def main():

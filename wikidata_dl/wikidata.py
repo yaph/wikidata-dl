@@ -17,7 +17,7 @@ formats = {
 }
 
 
-def get(query: str, format: str) -> dict:
+def get(query: str, format: str) -> str:
     """Return a set of Wikibase IDs for given query from Wikidata."""
 
     params = {'query': query}
@@ -42,7 +42,7 @@ def records(result: str, format: str) -> Iterator[list]:
             yield [x['value'] for x in obj.values()]
 
 
-def wikibase_ids(values: list) -> str:
+def wikibase_ids(values: list) -> list[str]:
     """Return Wikibase IDs from the given record."""
 
     return [v.split('/')[-1] for v in values
