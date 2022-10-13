@@ -28,8 +28,9 @@ def main():
 
     # Get and save result
     result = wikidata.get(argv.query_file.read(), argv.format)
-    file_name = f'{Path(argv.query_file.name).stem}.{argv.format}'
-    Path(argv.cache_dir).joinpath(file_name).write_text(result)
+    name = f'{Path(argv.query_file.name).stem}.{argv.format}'
+    p_cache = Path(argv.cache_dir)
+    p_cache.joinpath(name).write_text(result)
 
     if not argv.items:
         exit()
@@ -40,7 +41,7 @@ def main():
         for wid in wikidata.wikibase_ids(record):
             count += 1
             print(f'{count:>5}\tProcess Wikidata item: {wid}')
-            download(wid, root=argv.cache_dir, lifetime=argv.cache_lifetime)
+            download(wid, root=p_cache, lifetime=argv.cache_lifetime)
 
 
 if __name__ == '__main__':

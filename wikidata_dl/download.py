@@ -20,17 +20,15 @@ def is_current(mtime: float, data: dict) -> bool:
     return datetime.fromtimestamp(mtime, tz=timezone.utc) > parsedate(data['modified']['wikidata'])
 
 
-def download(wikibase_id: str, root: str, lifetime: int) -> None:
+def download(wikibase_id: str, root: Path, lifetime: int) -> None:
     """Fetch and cache data for all Wikibase IDs passed to this function."""
 
-    p_dir = Path(root)
-    p_dir.mkdir(exist_ok=True, parents=True)
+    root.mkdir(exist_ok=True, parents=True)
+    file = root.joinpath(wikibase_id + '.json')
+    mtime = file.lstat().st_mtime if file.exists() else None
 
-    p_file = p_dir.joinpath(wikibase_id + '.json')
-    mtime = p_file.lstat().st_mtime if p_file.exists() else None
-
-    if mtime and (mtime - p_file.lstat().st_mtime < lifetime):
-        logging.info(f'Cached file {p_file} is still valid.')
+    if mtime and (time.time() - mtime < lifetime):
+        logging.info(f'Cached file {file} is still valid.')
         return
 
     # Fetch Wikidata
@@ -44,7 +42,7 @@ def download(wikibase_id: str, root: str, lifetime: int) -> None:
         return
 
     if mtime and is_current(mtime, page.data):
-        logging.info(f'Last wikidata update older than {p_file}.')
+        logging.info(f'Last wikidata update older than {file}.')
         return
 
     # Make a copy to keep original values in case of redirects
@@ -70,7 +68,7 @@ def download(wikibase_id: str, root: str, lifetime: int) -> None:
     if wikibase_id == page.data['wikibase'] and desc and not desc.startswith('Disambiguation page'):
         wikidata.update(page.data)
 
-    logging.info(f'Write data to {p_file}.')
-    p_file.write_text(json.dumps(wikidata))
+    logging.info(f'Write data to {file}.')
+    file.write_text(json.dumps(wikidata))
 
     time.sleep(1)
