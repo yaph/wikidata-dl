@@ -23,16 +23,15 @@ formats = {
 }
 
 
-def download(wikibase_id: str, root: Path, lifetime: int, sleep: int = 1) -> None:
+def download(wikibase_id: str, root: Path, lifetime: int) -> str:
     """
-    Fetch and cache data for Wikibase ID passed to this function.
+    Fetch and cache data for Wikibase ID passed to this function. Returns a status message.
 
     Parameters
     ----------
     wikibase_id : Wikibase item ID.
     root : Path of cache directory.
     lifetime : Cache lifetime in seconds.
-    sleep : Sleep time after request in seconds.
     """
 
     root.mkdir(exist_ok=True, parents=True)
@@ -40,28 +39,24 @@ def download(wikibase_id: str, root: Path, lifetime: int, sleep: int = 1) -> Non
     mtime = file.lstat().st_mtime if file.exists() else None
 
     if mtime and (time.time() - mtime < lifetime):
-        print(f'Cached file {file} is still valid.')
-        return
+        return f'Cached file {file} is still valid.'
 
     # Fetch Wikidata
     page = wptools.page(wikibase=wikibase_id, silent=True, verbose=False)
     try:
         page.get_wikidata()
     except (LookupError, ValueError) as err:
-        print(f'Wikidata for {wikibase_id} could not be fetched.\n{err}')
-        return
+        return f'Wikidata for {wikibase_id} could not be fetched.\n{err}'
 
     if mtime and is_current(mtime, page.data):
-        print(f'Last wikidata update older than {file}.')
-        return
+        return f'Last wikidata update older than {file}.'
 
     # Make a copy to keep original values in case of redirects
     data = page.data.copy()
 
     # Only consider items that have an English label
     if not data['label']:
-        print(f'{wikibase_id} has no English label.')
-        return
+        return f'{wikibase_id} has no English label.'
 
     # Add sitelinks to data
     response = json.loads(page.cache['wikidata']['response'])
@@ -71,7 +66,7 @@ def download(wikibase_id: str, root: Path, lifetime: int, sleep: int = 1) -> Non
     try:
         page.get_restbase('/page/summary/')
     except LookupError:
-        print(f'Wikipedia summary for {page.data["title"]} could not be fetched.')
+        return f'Wikipedia summary for {page.data["title"]} could not be fetched.'
 
     # In case of redirects or disambiguation pages returned from restbase request keep data from wikidata request
     desc = page.data['description']
@@ -79,7 +74,7 @@ def download(wikibase_id: str, root: Path, lifetime: int, sleep: int = 1) -> Non
         data.update(page.data)
 
     file.write_text(json.dumps(data))
-    time.sleep(sleep)
+    return f'Saved item data in {file}'
 
 
 def get(query: str, format: str) -> str:

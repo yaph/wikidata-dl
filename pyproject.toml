@@ -60,7 +60,7 @@ cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=wikida
 no-cov = "cov --no-cov"
 qa = "flake8 wikidata_dl tests"
 testcli = "wikidata_dl/cli.py --items tests/queries/continents-on-earth.sparql"
-typecheck = "mypy -p wikidata_dl"
+typecheck = "mypy wikidata_dl"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["39", "310", "311"]
