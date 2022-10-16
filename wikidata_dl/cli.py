@@ -7,8 +7,6 @@ import wikidata
 from pathlib import Path
 from sys import exit
 
-from download import download
-
 
 def main():
     parser = argparse.ArgumentParser(description='Download data files from Wikidata for the given query.')
@@ -41,7 +39,7 @@ def main():
         for wid in wikidata.wikibase_ids(record):
             count += 1
             print(f'{count:>5}\tProcess Wikidata item: {wid}')
-            download(wid, root=p_cache, lifetime=argv.cache_lifetime)
+            wikidata.download(wid, root=p_cache, lifetime=argv.cache_lifetime)
 
 
 if __name__ == '__main__':
