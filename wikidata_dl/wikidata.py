@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import csv
 import json
-import logging
 import time
 
 import wptools  # type: ignore
@@ -23,8 +22,6 @@ formats = {
     'json': 'application/sparql-results+json'
 }
 
-logging.basicConfig(filename='wikidata.log', level=logging.WARNING)
-
 
 def download(wikibase_id: str, root: Path, lifetime: int, sleep: int = 1) -> None:
     """
@@ -43,7 +40,7 @@ def download(wikibase_id: str, root: Path, lifetime: int, sleep: int = 1) -> Non
     mtime = file.lstat().st_mtime if file.exists() else None
 
     if mtime and (time.time() - mtime < lifetime):
-        logging.info(f'Cached file {file} is still valid.')
+        print(f'Cached file {file} is still valid.')
         return
 
     # Fetch Wikidata
@@ -51,11 +48,11 @@ def download(wikibase_id: str, root: Path, lifetime: int, sleep: int = 1) -> Non
     try:
         page.get_wikidata()
     except (LookupError, ValueError) as err:
-        logging.error(f'Wikidata for {wikibase_id} could not be fetched.\n{err}')
+        print(f'Wikidata for {wikibase_id} could not be fetched.\n{err}')
         return
 
     if mtime and is_current(mtime, page.data):
-        logging.info(f'Last wikidata update older than {file}.')
+        print(f'Last wikidata update older than {file}.')
         return
 
     # Make a copy to keep original values in case of redirects
@@ -63,7 +60,7 @@ def download(wikibase_id: str, root: Path, lifetime: int, sleep: int = 1) -> Non
 
     # Only consider items that have an English label
     if not data['label']:
-        logging.warning(f'{wikibase_id} has no English label.')
+        print(f'{wikibase_id} has no English label.')
         return
 
     # Add sitelinks to data
@@ -74,16 +71,14 @@ def download(wikibase_id: str, root: Path, lifetime: int, sleep: int = 1) -> Non
     try:
         page.get_restbase('/page/summary/')
     except LookupError:
-        logging.error(f'Wikipedia summary for {page.data["title"]} could not be fetched.')
+        print(f'Wikipedia summary for {page.data["title"]} could not be fetched.')
 
     # In case of redirects or disambiguation pages returned from restbase request keep data from wikidata request
     desc = page.data['description']
     if wikibase_id == page.data['wikibase'] and desc and not desc.startswith('Disambiguation page'):
         data.update(page.data)
 
-    logging.info(f'Write data to {file}.')
     file.write_text(json.dumps(data))
-
     time.sleep(sleep)
 
 
