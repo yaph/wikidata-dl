@@ -58,13 +58,6 @@ dependencies = [
   "pytest-cov",
 ]
 
-[tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=wikidata-dl --cov=tests"
-no-cov = "cov --no-cov"
-qa = "flake8 wikidata_dl tests"
-testcli = "wikidata_dl/cli.py --items tests/queries/continents-on-earth.sparql"
-typecheck = "mypy wikidata_dl"
-
 [[tool.hatch.envs.test.matrix]]
 python = ["39", "310", "311"]
 
