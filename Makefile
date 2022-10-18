@@ -26,6 +26,8 @@ build: clean checks
 
 
 test-cli:
+	rm wikidata/*.*
+	wikidata_dl/cli.py --format json tests/queries/continents-on-earth.sparql
 	wikidata_dl/cli.py --items tests/queries/continents-on-earth.sparql
 
 
