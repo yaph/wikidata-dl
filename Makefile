@@ -11,13 +11,13 @@ clean:
 
 
 coverage:
-	pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=wikidata-dl --cov=tests
+	pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=wikidata_dl --cov=tests
 
 
 checks:
 	flake8 wikidata_dl tests
 	mypy wikidata_dl
-#pytest
+	pytest -s
 
 
 # Build source and wheel packages

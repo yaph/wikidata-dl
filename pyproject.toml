@@ -75,6 +75,11 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 
+[tool.pytest.ini_options]
+pythonpath = [
+  ".", "wikidata_dl",
+]
+
 [tool.hatch.build.targets.sdist]
 exclude = [
     "/.github",
