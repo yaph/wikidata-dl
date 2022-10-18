@@ -3,8 +3,8 @@ import csv
 import json
 import time
 
-import wptools  # type: ignore
 import httpx
+import wptools  # type: ignore
 
 import vocabulary
 
