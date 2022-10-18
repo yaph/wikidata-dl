@@ -23,7 +23,7 @@ formats = {
 }
 
 
-def download(wikibase_id: str, root: Path, lifetime: int) -> str:
+def download(wikibase_id: str, root: Path, lifetime: int, language: str) -> str:
     """
     Fetch and cache data for Wikibase ID passed to this function. Returns a status message.
 
@@ -32,6 +32,7 @@ def download(wikibase_id: str, root: Path, lifetime: int) -> str:
     wikibase_id : Wikibase item ID.
     root : Path of cache directory.
     lifetime : Cache lifetime in seconds.
+    language : Language code used by Wikimedia, see: https://meta.wikimedia.org/wiki/Table_of_Wikimedia_projects
     """
 
     file = root.joinpath(wikibase_id + '.json')
@@ -41,7 +42,7 @@ def download(wikibase_id: str, root: Path, lifetime: int) -> str:
         return f'Cached file {file} is still valid.'
 
     # Fetch Wikidata
-    page = wptools.page(wikibase=wikibase_id, silent=True, verbose=False)
+    page = wptools.page(wikibase=wikibase_id, lang=language, silent=True, verbose=False)
     try:
         page.get_wikidata()
     except (LookupError, ValueError) as err:
@@ -53,9 +54,9 @@ def download(wikibase_id: str, root: Path, lifetime: int) -> str:
     # Make a copy to keep original values in case of redirects
     data = page.data.copy()
 
-    # Only consider items that have an English label
+    # Only consider items that have a label
     if not data['label']:
-        return f'{wikibase_id} has no English label.'
+        return f'{wikibase_id} has no label.'
 
     # Add sitelinks to data
     response = json.loads(page.cache['wikidata']['response'])

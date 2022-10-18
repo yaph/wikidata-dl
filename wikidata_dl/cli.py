@@ -15,21 +15,21 @@ def main():
                         help='The file containing the SPARQL query to pass to the Wikidata query service.')
     parser.add_argument('--cache-dir', '-d', type=Path, default='wikidata',
                         help='The directory where Wikidata files are stored.')
-    parser.add_argument('--cache-lifetime', '-l', default=2592000, type=int,
-                        help='Cache lifetime in seconds, set to 30 days by default.')
-    parser.add_argument('--dry-run', '-n', action='store_true',
-                        help='Run the query and print the result count without downloading any data.')
+    parser.add_argument('--cache-time', '-t', default=2592000, type=int,
+                        help='Cache time in seconds, set to 30 days by default.')
     parser.add_argument('--format', '-f', choices=('csv', 'json'), default='csv',
                         help='Download format, defaults to csv.')
     parser.add_argument('--items', '-i', action='store_true',
                         help='Download Wikidata items as individual JSON files.')
+    parser.add_argument('--language', '-l', type=str, default='en',
+                        help='Get item results in this language. Enter a language code used by Wikimedia.')
     parser.add_argument('--sleep', '-s', type=int, default=1,
                         help='Sleep time between file downloads in seconds.')
     argv = parser.parse_args()
 
     argv.cache_dir.mkdir(exist_ok=True, parents=True)
 
-    # Get and save result
+    # Get and save result.
     result = wikidata.get(argv.query_file.read_text(), argv.format)
     file = argv.cache_dir.joinpath(f'{argv.query_file.stem}.{argv.format}')
     file.write_text(result)
@@ -38,13 +38,17 @@ def main():
     if not argv.items:
         exit()
 
+    # Save items in language sub directory.
+    cache_items = argv.cache_dir.joinpath(argv.language)
+    cache_items.mkdir(exist_ok=True)
+
     # Download individual items as JSON files.
     count = 0
     for record in wikidata.records(result, argv.format):
         for wid in wikidata.wikibase_ids(record):
             count += 1
             print(f'{count:>5}\tProcess Wikidata item: {wid}')
-            msg = wikidata.download(wid, root=argv.cache_dir, lifetime=argv.cache_lifetime)
+            msg = wikidata.download(wid, root=cache_items, lifetime=argv.cache_time, language=argv.language)
             msg and print(f'\t{msg}')
             time.sleep(argv.sleep)
 
