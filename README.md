@@ -10,13 +10,9 @@
 
 ## Usage
 
-Download all results returned by the query and store them in the `wikidata` directory in the current working directory:
+Download result returned from the query and save it in the directory `./wikidata`:
 
     wikidata-dl /path/to/my-query.sparql
-
-Show only the result count returned by the query without downloading anything:
-
-    wikidata-dl --dry-run /path/to/my-query.sparql
 
 For a complete reference of the command line options run:
 
@@ -29,8 +25,3 @@ The following query returns IDs for all Wikidata entities that are an instance o
     SELECT ?item WHERE {
         ?item wdt:P31 wd:Q5107.
     }
-
-## Conventions
-
-* The SPARQL query you pass to the program must return [Wikibase](https://www.mediawiki.org/wiki/Wikibase/DataModel/Primer) IDs.
-* The query variable where the entity ID is stored must be called ``item``.
