@@ -34,7 +34,6 @@ def download(wikibase_id: str, root: Path, lifetime: int) -> str:
     lifetime : Cache lifetime in seconds.
     """
 
-    root.mkdir(exist_ok=True, parents=True)
     file = root.joinpath(wikibase_id + '.json')
     mtime = file.lstat().st_mtime if file.exists() else None
 
@@ -49,7 +48,7 @@ def download(wikibase_id: str, root: Path, lifetime: int) -> str:
         return f'Wikidata for {wikibase_id} could not be fetched.\n{err}'
 
     if mtime and is_current(mtime, page.data):
-        return f'Last wikidata update older than {file}.'
+        return f'Last Wikidata update older than {file}.'
 
     # Make a copy to keep original values in case of redirects
     data = page.data.copy()

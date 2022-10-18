@@ -27,6 +27,8 @@ def main():
                         help='Sleep time between file downloads in seconds.')
     argv = parser.parse_args()
 
+    argv.cache_dir.mkdir(exist_ok=True, parents=True)
+
     # Get and save result
     result = wikidata.get(argv.query_file.read_text(), argv.format)
     file = argv.cache_dir.joinpath(f'{argv.query_file.stem}.{argv.format}')

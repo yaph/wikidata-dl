@@ -26,9 +26,9 @@ build: clean checks
 
 
 test-cli:
-	rm wikidata/*.*
-	wikidata_dl/cli.py --format json tests/queries/continents-on-earth.sparql
-	wikidata_dl/cli.py --items tests/queries/continents-on-earth.sparql
+	rm -rf tests/data/
+	wikidata_dl/cli.py --cache-dir tests/data --format json tests/queries/continents-on-earth.sparql
+	wikidata_dl/cli.py --cache-dir tests/data --items tests/queries/continents-on-earth.sparql
 
 
 # Call example: make release version=2022.03.04
