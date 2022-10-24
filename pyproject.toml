@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "wikidata_dl"
+name = "wikidata-dl"
 description = "Download data from Wikidata based on input SPARQL query."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -43,7 +43,7 @@ wikidata-dl = "wikidata_dl.cli:main"
 
 [project.urls]
 Documentation = "https://github.com/yaph/wikidata-dl#readme"
-Issues = "https://github.com/yaph/wikidata_dl/issues"
+Issues = "https://github.com/yaph/wikidata-dl/issues"
 Source = "https://github.com/yaph/wikidata-dl"
 
 [tool.hatch.version]

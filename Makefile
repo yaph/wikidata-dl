@@ -31,7 +31,7 @@ test-cli:
 	wikidata_dl/cli.py --cache-dir tests/data --items tests/queries/continents-on-earth.sparql
 
 
-# Call example: make release version=2022.03.04
+# Call example: make release version=2022.10.25
 release: build
 	git tag -a $(version) -m 'Create version $(version)'
 	git push --tags
