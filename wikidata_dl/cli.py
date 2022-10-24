@@ -16,9 +16,9 @@ def main():
     parser.add_argument('--cache-dir', '-d', type=Path, default='wikidata',
                         help='The directory where Wikidata files are stored.')
     parser.add_argument('--cache-time', '-t', default=2592000, type=int,
-                        help='Cache time in seconds, set to 30 days by default.')
+                        help='Cache time for items in seconds, set to 30 days by default.')
     parser.add_argument('--format', '-f', choices=('csv', 'json'), default='csv',
-                        help='Download format, defaults to csv.')
+                        help='Download format of query result, defaults to csv.')
     parser.add_argument('--items', '-i', action='store_true',
                         help='Download Wikidata items as individual JSON files.')
     parser.add_argument('--language', '-l', type=str, default='en',
