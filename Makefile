@@ -16,7 +16,7 @@ coverage:
 
 checks:
 	flake8 wikidata_dl tests
-	mypy wikidata_dl
+	mypy -p wikidata_dl
 	pytest -s
 
 

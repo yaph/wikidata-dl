@@ -3,10 +3,10 @@
 import argparse
 import time
 
-import wikidata
-
 from pathlib import Path
 from sys import exit
+
+from wikidata_dl import wikidata
 
 
 def main():

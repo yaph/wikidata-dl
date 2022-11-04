@@ -6,13 +6,13 @@ import time
 import httpx
 import wptools  # type: ignore
 
-import vocabulary
-
 from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 
 from dateutil.parser import parse as parsedate  # type: ignore
+
+from wikidata_dl import vocabulary
 
 
 api_endpoint = 'https://query.wikidata.org/sparql'

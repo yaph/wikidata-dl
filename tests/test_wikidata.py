@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import wikidata
+from wikidata_dl import wikidata
 
 from pathlib import Path
 
