@@ -25,3 +25,5 @@ The following query returns IDs for all Wikidata entities that are an instance o
     SELECT ?item WHERE {
         ?item wdt:P31 wd:Q5107.
     }
+
+[Try the query](https://query.wikidata.org/#SELECT%20%3Fitem%20WHERE%20%7B%20%3Fitem%20wdt%3AP31%20wd%3AQ5107.%20%7D)

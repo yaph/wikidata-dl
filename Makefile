@@ -6,8 +6,10 @@ clean:
 	find . -name '*~' -exec rm -f {} +
 	find . -name '__pycache__' -exec rm -fr {} +
 	rm -f .coverage
-	rm -fr htmlcov/
 	rm -fr .pytest_cache
+	rm -fr htmlcov/
+	rm -f dist/*
+
 
 
 coverage:
@@ -31,7 +33,7 @@ test-cli:
 	wikidata_dl/cli.py --cache-dir tests/data --items tests/queries/continents-on-earth.sparql
 
 
-# Call example: make release version=2022.10.25
+# Call example: make release version=2022.11.04
 release: build
 	git tag -a $(version) -m 'Create version $(version)'
 	git push --tags
