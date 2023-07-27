@@ -31,6 +31,7 @@ test-cli:
 	rm -rf tests/data/
 	wikidata_dl/cli.py --cache-dir tests/data --format json tests/queries/continents-on-earth.sparql
 	wikidata_dl/cli.py --cache-dir tests/data --items tests/queries/continents-on-earth.sparql
+	wikidata_dl/cli.py --cache-dir tests/data --timeout 0 tests/queries/nevada-events.sparql
 
 
 # Call example: make release version=2022.11.04

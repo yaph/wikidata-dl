@@ -1,0 +1,21 @@
+#title: Recent events
+SELECT ?event ?eventLabel ?date ?location
+WITH {
+  SELECT DISTINCT ?event ?date ?location
+  WHERE {
+    # find events
+    wd:Q1227 wdt:P625 ?nevada. 
+    ?event wdt:P31/wdt:P279* wd:Q1190554.
+           # wdt:P17 wd:Q30;
+    # with a point in time or start date
+    OPTIONAL { ?event wdt:P585 ?date. }
+    OPTIONAL { ?event wdt:P580 ?date. }
+    ?event wdt:P625 ?location.
+    FILTER(geof:distance(?location, ?nevada) < 400).
+  }
+  LIMIT 1000
+} AS %i
+WHERE {
+  INCLUDE %i
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" . }
+}

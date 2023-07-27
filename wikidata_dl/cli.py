@@ -25,12 +25,18 @@ def main():
                         help='Get item results in this language. Enter a language code used by Wikimedia.')
     parser.add_argument('--sleep', '-s', type=int, default=1,
                         help='Sleep time between file downloads in seconds.')
+    parser.add_argument('--timeout', type=float, default=5.0,
+                        help='Set the timeout for fetching content (in seconds). Use 0 for no timeout.')
+
     argv = parser.parse_args()
 
     argv.cache_dir.mkdir(exist_ok=True, parents=True)
 
+    # Timeout must be a float larger than 0. Users can pass 0 as a CLI option to turn off the timeout.
+    timeout = argv.timeout if argv.timeout > 0 else None
+
     # Get and save result.
-    result = wikidata.get(argv.query_file.read_text(), argv.format)
+    result = wikidata.get(argv.query_file.read_text(), argv.format, timeout)
     file = argv.cache_dir.joinpath(f'{argv.query_file.stem}.{argv.format}')
     file.write_text(result)
     print(f'Saved query result in {file}\n')

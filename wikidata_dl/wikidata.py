@@ -77,7 +77,7 @@ def download(wikibase_id: str, root: Path, lifetime: int, language: str) -> str:
     return f'Saved item data in {file}'
 
 
-def get(query: str, format: str) -> str:
+def get(query: str, format: str, timeout: float) -> str:
     """
     Return a set of Wikibase IDs for given query from Wikidata.
 
@@ -89,12 +89,17 @@ def get(query: str, format: str) -> str:
 
     params = {'query': query}
     headers = {'Accept': formats[format]}
-    resp = httpx.get(api_endpoint, params=params, headers=headers)
 
-    if resp.is_success:
-        return resp.text
+    try:
+        resp = httpx.get(api_endpoint, params=params, headers=headers, timeout=timeout)
+    except httpx.ReadTimeout:
+        print('Timeout error: Use the --timeout option to increase the timeout or set it to 0 to turn timeouts off.')
+    else:
+        if resp.is_success:
+            return resp.text
 
-    raise Exception('Data could not be fetched.')
+    print('Data could not be fetched.')
+    quit()
 
 
 def is_current(mtime: float, data: dict) -> bool:
