@@ -34,7 +34,7 @@ test-cli:
 	wikidata_dl/cli.py --cache-dir tests/data --timeout 0 tests/queries/nevada-events.sparql
 
 
-# Call example: make release version=2022.11.04
+# Call example: make release version=2023.07.27
 release: build
 	git tag -a $(version) -m 'Create version $(version)'
 	git push --tags
