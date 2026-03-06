@@ -1,19 +1,16 @@
-# -*- coding: utf-8 -*-
 import csv
 import json
+import sys
 import time
-
-import httpx
-import wptools  # type: ignore
-
 from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 
+import httpx
+import wptools  # type: ignore
 from dateutil.parser import parse as parsedate  # type: ignore
 
 from wikidata_dl import vocabulary
-
 
 api_endpoint = 'https://query.wikidata.org/sparql'
 
@@ -79,7 +76,7 @@ def download(wikibase_id: str, root: Path, lifetime: int, language: str) -> str:
     return f'Saved item data in {file}'
 
 
-def get(query: str, format: str, timeout: float) -> str:
+def get(query: str, format_: str, timeout: float) -> str:
     """
     Return a set of Wikibase IDs for given query from Wikidata.
 
@@ -91,7 +88,7 @@ def get(query: str, format: str, timeout: float) -> str:
 
     params = {'query': query}
     headers = {
-        'accept': formats[format],
+        'accept': formats[format_],
         'user-agent': user_agent
     }
 
@@ -103,8 +100,7 @@ def get(query: str, format: str, timeout: float) -> str:
         if resp.is_success:
             return resp.text
 
-    print('Data could not be fetched.')
-    quit()
+    sys.exit('Data could not be fetched.')
 
 
 def is_current(mtime: float, data: dict) -> bool:
@@ -120,7 +116,7 @@ def is_current(mtime: float, data: dict) -> bool:
     return datetime.fromtimestamp(mtime, tz=timezone.utc) > parsedate(data['modified']['wikidata'])
 
 
-def records(result: str, format: str) -> Iterator[list]:
+def records(result: str, format_: str) -> Iterator[list]:
     """
     Yield Wikidata item values from the query result.
 
@@ -130,11 +126,10 @@ def records(result: str, format: str) -> Iterator[list]:
     format : Data format.
     """
 
-    if 'csv' == format:
+    if format_ == 'csv':
         # Ignore first line with column headings
-        for record in csv.reader(result.splitlines()[1:]):
-            yield record
-    elif 'json' == format:
+        yield from csv.reader(result.splitlines()[1:])
+    elif format_ == 'json':
         for obj in json.loads(result)['results']['bindings']:
             yield [x['value'] for x in obj.values()]
 

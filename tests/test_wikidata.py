@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-from wikidata_dl import wikidata
-
 from pathlib import Path
 
+from wikidata_dl import wikidata
 
 data_dir = Path('tests/data').absolute()
 result_csv = data_dir.joinpath('continents-on-earth.csv').read_text()
@@ -11,7 +9,7 @@ sample_record = ['http://www.wikidata.org/entity/Q51', 'Antarctica', 14200000.0,
 
 
 def is_record(rec):
-    return len(rec) and list == type(rec)
+    return len(rec) and list is type(rec)
 
 
 def test_records_csv():
@@ -25,4 +23,4 @@ def test_records_json():
 
 
 def test_wikibase_ids():
-    assert ['Q51'] == wikidata.wikibase_ids(sample_record)
+    assert wikidata.wikibase_ids(sample_record) == ['Q51']

@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import argparse
+import sys
 import time
-
 from pathlib import Path
-from sys import exit
 
 from wikidata_dl import wikidata
 
@@ -42,7 +40,7 @@ def main():
     print(f'Saved query result in {file}\n')
 
     if not argv.items:
-        exit()
+        sys.exit()
 
     # Save items in language sub directory.
     cache_items = argv.cache_dir.joinpath(argv.language)

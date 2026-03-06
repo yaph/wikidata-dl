@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Constants that define OWL and RDF vocabularies.
 #
 # Source: https://github.com/Wikidata/Wikidata-Toolkit/blob/master/wdtk-rdf/src/main/java/org/wikidata/wdtk/rdf/Vocabulary.java

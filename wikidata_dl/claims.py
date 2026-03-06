@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import json
-
 from pathlib import Path
-
 
 data = json.loads(Path('./tests/data/en/Q15.json').read_text())
 
