@@ -22,6 +22,8 @@ formats = {
     'json': 'application/sparql-results+json'
 }
 
+user_agent = 'wikidata-dl'
+
 
 def download(wikibase_id: str, root: Path, lifetime: int, language: str) -> str:
     """
@@ -88,10 +90,14 @@ def get(query: str, format: str, timeout: float) -> str:
     """
 
     params = {'query': query}
-    headers = {'Accept': formats[format]}
+    headers = {
+        'accept': formats[format],
+        'user-agent': user_agent
+    }
 
     try:
         resp = httpx.get(api_endpoint, params=params, headers=headers, timeout=timeout)
+        breakpoint()
     except httpx.ReadTimeout:
         print('Timeout error: Use the --timeout option to increase the timeout or set it to 0 to turn timeouts off.')
     else:

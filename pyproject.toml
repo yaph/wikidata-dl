@@ -58,6 +58,9 @@ dependencies = [
   "pytest-cov",
 ]
 
+[tool.hatch.envs.default.env-vars]
+PYTHONBREAKPOINT = "ipdb.set_trace"
+
 [[tool.hatch.envs.test.matrix]]
 python = ["39", "310", "311"]
 
