@@ -13,12 +13,12 @@ def is_record(rec):
 
 
 def test_records_csv():
-    for rec in wikidata.records(result_csv, format='csv'):
+    for rec in wikidata.records(result_csv, format_='csv'):
         assert is_record(rec)
 
 
 def test_records_json():
-    for rec in wikidata.records(result_json, format='json'):
+    for rec in wikidata.records(result_json, format_='json'):
         assert is_record(rec)
 
 
