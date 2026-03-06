@@ -87,3 +87,9 @@ pythonpath = [
 exclude = [
     "/.github",
 ]
+
+[tool.ruff.lint]
+ignore = ["T201"]
+
+[tool.ruff.format]
+quote-style = "preserve"
