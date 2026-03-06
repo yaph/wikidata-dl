@@ -97,7 +97,6 @@ def get(query: str, format: str, timeout: float) -> str:
 
     try:
         resp = httpx.get(api_endpoint, params=params, headers=headers, timeout=timeout)
-        breakpoint()
     except httpx.ReadTimeout:
         print('Timeout error: Use the --timeout option to increase the timeout or set it to 0 to turn timeouts off.')
     else:
