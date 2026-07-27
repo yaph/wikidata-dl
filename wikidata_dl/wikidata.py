@@ -14,10 +14,7 @@ from wikidata_dl import vocabulary
 
 api_endpoint = 'https://query.wikidata.org/sparql'
 
-formats = {
-    'csv': 'text/csv',
-    'json': 'application/sparql-results+json'
-}
+formats = {'csv': 'text/csv', 'json': 'application/sparql-results+json'}
 
 user_agent = 'wikidata-dl'
 
@@ -50,12 +47,12 @@ def download(wikibase_id: str, root: Path, lifetime: int, language: str) -> str:
     if mtime and is_current(mtime, page.data):
         return f'Last Wikidata update older than {file}.'
 
+    # Only consider items that have a label.
+    if not ensure_label(page.data, wikibase_id):
+        return f'{wikibase_id} has no label.'
+
     # Make a copy to keep original values in case of redirects
     data = page.data.copy()
-
-    # Only consider items that have a label
-    if not data['label']:
-        return f'{wikibase_id} has no label.'
 
     # Add sitelinks to data
     response = json.loads(page.cache['wikidata']['response'])
@@ -87,10 +84,7 @@ def get(query: str, format_: str, timeout: float) -> str:
     """
 
     params = {'query': query}
-    headers = {
-        'accept': formats[format_],
-        'user-agent': user_agent
-    }
+    headers = {'accept': formats[format_], 'user-agent': user_agent}
 
     try:
         resp = httpx.get(api_endpoint, params=params, headers=headers, timeout=timeout)
@@ -101,6 +95,63 @@ def get(query: str, format_: str, timeout: float) -> str:
             return resp.text
 
     sys.exit('Data could not be fetched.')
+
+
+def get_mul_label(wikibase_id: str) -> str:
+    """Return the multilingual label for a Wikidata entity.
+
+    Workaround for Wikidata entities that have no English label. Use the "mul" label instead,
+    which is a multilingual label.
+
+    Example URL: https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q187560&props=labels&languages=mul&format=json
+
+    Example response:
+    {
+        "entities": {
+            "Q187560": {
+                "type": "item",
+                "id": "Q187560",
+                "labels": {
+                    "mul": {
+                        "language": "mul",
+                        "value": "Scheme"
+                    }
+                }
+            }
+        },
+        "success": 1
+    }
+    """
+
+    resp = httpx.get(
+        'https://www.wikidata.org/w/api.php',
+        params={'action': 'wbgetentities', 'ids': wikibase_id, 'props': 'labels', 'languages': 'mul', 'format': 'json'},
+        headers={'user-agent': user_agent},
+    )
+    resp.raise_for_status()
+    labels = resp.json().get('entities', {}).get(wikibase_id, {}).get('labels', {})
+    return labels.get('mul', {}).get('value', '')
+
+
+def ensure_label(data: dict, wikibase_id: str) -> bool:
+    """
+    Ensure that the given data has a label. If not, try to get a multilingual label.
+
+    Parameters
+    ----------
+    data : Data as returned from wptools.
+    wikibase_id : Wikibase item ID.
+    """
+
+    if data['label']:
+        return True
+
+    try:
+        data['label'] = get_mul_label(wikibase_id)
+        return True
+    except httpx.HTTPStatusError as err:
+        print(f'Error fetching multilingual label for {wikibase_id}: {err}')
+        return False
 
 
 def is_current(mtime: float, data: dict) -> bool:
@@ -143,5 +194,6 @@ def wikibase_ids(values: list) -> list[str]:
     values : List of values as returned yielded from records function.
     """
 
-    return [v.split('/')[-1] for v in values
-            if isinstance(v, str) and v.startswith(vocabulary.PREFIX_WIKIDATA_ENTITY + 'Q')]
+    return [
+        v.split('/')[-1] for v in values if isinstance(v, str) and v.startswith(vocabulary.PREFIX_WIKIDATA_ENTITY + 'Q')
+    ]

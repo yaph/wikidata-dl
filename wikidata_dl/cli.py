@@ -9,22 +9,44 @@ from wikidata_dl import wikidata
 
 def main():
     parser = argparse.ArgumentParser(description='Download data files from Wikidata for the given query.')
-    parser.add_argument('query_file', type=Path, metavar='QUERY_FILE',
-                        help='The file containing the SPARQL query to pass to the Wikidata query service.')
-    parser.add_argument('--cache-dir', '-d', type=Path, default='wikidata',
-                        help='The directory where Wikidata files are stored.')
-    parser.add_argument('--cache-time', '-t', default=2592000, type=int,
-                        help='Cache time for items in seconds, set to 30 days by default.')
-    parser.add_argument('--format', '-f', choices=('csv', 'json'), default='csv',
-                        help='Download format of query result, defaults to csv.')
-    parser.add_argument('--items', '-i', action='store_true',
-                        help='Download Wikidata items as individual JSON files.')
-    parser.add_argument('--language', '-l', type=str, default='en',
-                        help='Get item results in this language. Enter a language code used by Wikimedia.')
-    parser.add_argument('--sleep', '-s', type=int, default=1,
-                        help='Sleep time between file downloads in seconds.')
-    parser.add_argument('--timeout', type=float, default=5.0,
-                        help='Set the timeout for fetching content (in seconds). Use 0 for no timeout.')
+    parser.add_argument(
+        'query_file',
+        type=Path,
+        metavar='QUERY_FILE',
+        help='The file containing the SPARQL query to pass to the Wikidata query service.',
+    )
+    parser.add_argument(
+        '--cache-dir', '-d', type=Path, default='wikidata', help='The directory where Wikidata files are stored.'
+    )
+    parser.add_argument(
+        '--cache-time',
+        '-t',
+        default=2592000,
+        type=int,
+        help='Cache time for items in seconds, set to 30 days by default.',
+    )
+    parser.add_argument(
+        '--format',
+        '-f',
+        choices=('csv', 'json'),
+        default='csv',
+        help='Download format of query result, defaults to csv.',
+    )
+    parser.add_argument('--items', '-i', action='store_true', help='Download Wikidata items as individual JSON files.')
+    parser.add_argument(
+        '--language',
+        '-l',
+        type=str,
+        default='en',
+        help='Get item results in this language. Enter a language code used by Wikimedia.',
+    )
+    parser.add_argument('--sleep', '-s', type=int, default=1, help='Sleep time between file downloads in seconds.')
+    parser.add_argument(
+        '--timeout',
+        type=float,
+        default=5.0,
+        help='Set the timeout for fetching content (in seconds). Use 0 for no timeout.',
+    )
 
     argv = parser.parse_args()
 
