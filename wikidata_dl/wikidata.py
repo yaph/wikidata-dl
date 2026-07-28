@@ -17,7 +17,7 @@ api_endpoint = 'https://query.wikidata.org/sparql'
 
 formats = {'csv': 'text/csv', 'json': 'application/sparql-results+json'}
 
-user_agent = 'wikidata-dl'
+DEFAULT_USER_AGENT = "wikidata-dl (https://github.com/yaph/wikidata-dl)"
 
 
 def download(wikibase_id: str, root: Path, lifetime: int, language: str, last_updated: datetime | None = None) -> str:
@@ -86,10 +86,10 @@ def get(query: str, format_: str, timeout: float) -> str:
     """
 
     params = {'query': wrap_query_with_last_updated(query)}
-    headers = {'accept': formats[format_], 'user-agent': user_agent}
+    headers = {'accept': formats[format_]}
 
     try:
-        resp = httpx.get(api_endpoint, params=params, headers=headers, timeout=timeout)
+        resp = wikidata_get(api_endpoint, params=params, headers=headers, timeout=timeout)
     except httpx.ReadTimeout:
         print('Timeout error: Use the --timeout option to increase the timeout or set it to 0 to turn timeouts off.')
     else:
@@ -125,10 +125,8 @@ def get_mul_label(wikibase_id: str) -> str:
     }
     """
 
-    resp = httpx.get(
-        'https://www.wikidata.org/w/api.php',
-        params={'action': 'wbgetentities', 'ids': wikibase_id, 'props': 'labels', 'languages': 'mul', 'format': 'json'},
-        headers={'user-agent': user_agent},
+    resp = wikidata_get('https://www.wikidata.org/w/api.php',
+        params={'action': 'wbgetentities', 'ids': wikibase_id, 'props': 'labels', 'languages': 'mul', 'format': 'json'}
     )
 
     resp.raise_for_status()
@@ -201,6 +199,19 @@ def wikibase_ids(values: list) -> list[str]:
     return [
         v.split('/')[-1] for v in values if isinstance(v, str) and v.startswith(vocabulary.PREFIX_WIKIDATA_ENTITY + 'Q')
     ]
+
+
+def wikidata_get(url: str, params: dict | None = None, headers: dict | None = None, timeout: float | None = None) -> httpx.Response:
+    """
+    Wrapper around httpx.get ensuring Wikimedia User-Agent Policy compliance.
+    """
+    req_headers = headers.copy() if headers else {}
+
+    # Priority: passed headers > DEFAULT_USER_AGENT
+    if 'user-agent' not in req_headers and 'User-Agent' not in req_headers:
+        req_headers['User-Agent'] = DEFAULT_USER_AGENT
+
+    return httpx.get(url, params=params, headers=req_headers, timeout=timeout)
 
 
 def wrap_query_with_last_updated(original_query: str, entity_var: str = "item") -> str:
