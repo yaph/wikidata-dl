@@ -1,5 +1,6 @@
 import csv
 import json
+import re
 import sys
 import time
 from collections.abc import Iterator
@@ -83,7 +84,7 @@ def get(query: str, format_: str, timeout: float) -> str:
     format : Return format for Wikidata response.
     """
 
-    params = {'query': query}
+    params = {'query': wrap_query_with_last_updated(query)}
     headers = {'accept': formats[format_], 'user-agent': user_agent}
 
     try:
@@ -197,3 +198,37 @@ def wikibase_ids(values: list) -> list[str]:
     return [
         v.split('/')[-1] for v in values if isinstance(v, str) and v.startswith(vocabulary.PREFIX_WIKIDATA_ENTITY + 'Q')
     ]
+
+
+def wrap_query_with_last_updated(original_query: str, entity_var: str = "item") -> str:
+    # 1. Normalize entity_var so it always starts with '?'
+    var_name = '?' + entity_var.lstrip('?')
+
+    # 2. Robust check for existing schema:dateModified pattern
+    if re.search(r'schema:dateModified', original_query, re.IGNORECASE):
+        return original_query
+
+    # 3. Separate PREFIX statements from the main query body
+    prefixes = []
+    query_body_lines = []
+
+    for line in original_query.splitlines():
+        if line.strip().upper().startswith('PREFIX'):
+            prefixes.append(line)
+        else:
+            query_body_lines.append(line)
+
+    prefix_str = '\n'.join(prefixes)
+    body_str = '\n'.join(query_body_lines).strip()
+
+    # 4. Wrap the body in a clean subquery structure
+    wrapped_query = f"""{prefix_str}
+
+SELECT DISTINCT * WHERE {{
+  {{
+    {body_str}
+  }}
+  OPTIONAL {{ {var_name} schema:dateModified {var_name}LastUpdated . }}
+}}"""
+
+    return wrapped_query.strip()
