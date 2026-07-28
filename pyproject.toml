@@ -89,7 +89,7 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-ignore = ["T201"]
+ignore = ["T201", "FA102"]
 
 [tool.ruff.format]
 quote-style = "preserve"

@@ -2,6 +2,7 @@
 import argparse
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 from wikidata_dl import wikidata
@@ -71,10 +72,18 @@ def main():
     # Download individual items as JSON files.
     count = 0
     for record in wikidata.records(result, argv.format):
+        # If the last column is a valid ISO 8601 date, use it as the last_updated parameter for the download function.
+        try:
+            last_updated = datetime.fromisoformat(record[-1])
+        except ValueError:
+            last_updated = None
+
         for wid in wikidata.wikibase_ids(record):
             count += 1
             print(f'{count:>5}\tProcess Wikidata item: {wid}')
-            msg = wikidata.download(wid, root=cache_items, lifetime=argv.cache_time, language=argv.language)
+            msg = wikidata.download(
+                wid, root=cache_items, lifetime=argv.cache_time, language=argv.language, last_updated=last_updated
+            )
             msg and print(f'\t{msg}')
             time.sleep(argv.sleep)
 

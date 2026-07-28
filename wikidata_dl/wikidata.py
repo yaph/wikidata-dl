@@ -20,7 +20,7 @@ formats = {'csv': 'text/csv', 'json': 'application/sparql-results+json'}
 user_agent = 'wikidata-dl'
 
 
-def download(wikibase_id: str, root: Path, lifetime: int, language: str) -> str:
+def download(wikibase_id: str, root: Path, lifetime: int, language: str, last_updated: datetime | None = None) -> str:
     """
     Fetch and cache data for Wikibase ID passed to this function. Returns a status message.
 
@@ -30,12 +30,13 @@ def download(wikibase_id: str, root: Path, lifetime: int, language: str) -> str:
     root : Path of cache directory.
     lifetime : Cache lifetime in seconds.
     language : Language code used by Wikimedia, see: https://meta.wikimedia.org/wiki/Table_of_Wikimedia_projects
+    last_updated : Optional datetime object representing the last updated time of the item. If provided, it will be used to determine if the cached data is still valid.
     """
 
     file = root.joinpath(wikibase_id + '.json')
     mtime = file.lstat().st_mtime if file.exists() else None
 
-    if mtime and (time.time() - mtime < lifetime):
+    if mtime and ((time.time() - mtime < lifetime) or (last_updated and last_updated.timestamp() < mtime)):
         return f'Cached file {file} is still valid.'
 
     # Fetch Wikidata
@@ -129,6 +130,7 @@ def get_mul_label(wikibase_id: str) -> str:
         params={'action': 'wbgetentities', 'ids': wikibase_id, 'props': 'labels', 'languages': 'mul', 'format': 'json'},
         headers={'user-agent': user_agent},
     )
+
     resp.raise_for_status()
     labels = resp.json().get('entities', {}).get(wikibase_id, {}).get('labels', {})
     return labels.get('mul', {}).get('value', '')
@@ -149,10 +151,11 @@ def ensure_label(data: dict, wikibase_id: str) -> bool:
 
     try:
         data['label'] = get_mul_label(wikibase_id)
-        return True
     except httpx.HTTPStatusError as err:
         print(f'Error fetching multilingual label for {wikibase_id}: {err}')
         return False
+
+    return True
 
 
 def is_current(mtime: float, data: dict) -> bool:
