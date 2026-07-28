@@ -47,9 +47,9 @@ def download(wikibase_id: str, root: Path, lifetime: int, language: str) -> str:
     if mtime and is_current(mtime, page.data):
         return f'Last Wikidata update older than {file}.'
 
-    # Only consider items that have a label.
-    if not ensure_label(page.data, wikibase_id):
-        return f'{wikibase_id} has no label.'
+    # Only consider items that have a label and a title.
+    if not (ensure_label(page.data, wikibase_id) and 'title' in page.data):
+        return f'{wikibase_id} must have a label and a title. Skipping.'
 
     # Make a copy to keep original values in case of redirects
     data = page.data.copy()
@@ -61,7 +61,7 @@ def download(wikibase_id: str, root: Path, lifetime: int, language: str) -> str:
     # Load summary from Wikipedia
     try:
         page.get_restbase('/page/summary/')
-    except LookupError:
+    except (LookupError, ValueError):
         return f'Wikipedia summary for {page.data["title"]} could not be fetched.'
 
     # In case of redirects or disambiguation pages returned from restbase request keep data from wikidata request
