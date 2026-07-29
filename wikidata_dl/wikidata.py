@@ -1,6 +1,5 @@
 import csv
 import json
-import re
 import sys
 import time
 from collections.abc import Iterator
@@ -219,7 +218,7 @@ def wrap_query_with_last_updated(original_query: str, entity_var: str = "item") 
     var_name = '?' + entity_var.lstrip('?')
 
     # 2. Robust check for existing schema:dateModified pattern
-    if re.search(r'schema:dateModified', original_query, re.IGNORECASE):
+    if 'schema:datemodified' in original_query.lower():
         return original_query
 
     # 3. Separate PREFIX statements from the main query body
