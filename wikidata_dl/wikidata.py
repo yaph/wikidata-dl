@@ -29,7 +29,8 @@ def download(wikibase_id: str, root: Path, lifetime: int, language: str, last_up
     root : Path of cache directory.
     lifetime : Cache lifetime in seconds.
     language : Language code used by Wikimedia, see: https://meta.wikimedia.org/wiki/Table_of_Wikimedia_projects
-    last_updated : Optional datetime object representing the last updated time of the item. If provided, it will be used to determine if the cached data is still valid.
+    last_updated : Optional datetime object representing the last updated time of the item.
+    If provided, it will be used to determine if the cached data is still valid.
     """
 
     file = root.joinpath(wikibase_id + '.json')
@@ -124,8 +125,14 @@ def get_mul_label(wikibase_id: str) -> str:
     }
     """
 
-    resp = wikidata_get('https://www.wikidata.org/w/api.php',
-        params={'action': 'wbgetentities', 'ids': wikibase_id, 'props': 'labels', 'languages': 'mul', 'format': 'json'}
+    resp = wikidata_get(
+        'https://www.wikidata.org/w/api.php',
+        params={
+            'action': 'wbgetentities',
+            'ids': wikibase_id,
+            'props': 'labels',
+            'languages': 'mul',
+            'format': 'json'}
     )
 
     resp.raise_for_status()
@@ -200,7 +207,11 @@ def wikibase_ids(values: list) -> list[str]:
     ]
 
 
-def wikidata_get(url: str, params: dict | None = None, headers: dict | None = None, timeout: float | None = None) -> httpx.Response:
+def wikidata_get(
+        url: str,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout: float | None = None) -> httpx.Response:
     """
     Wrapper around httpx.get ensuring Wikimedia User-Agent Policy compliance.
     """
