@@ -3,7 +3,7 @@ import json
 import sys
 import time
 from collections.abc import Iterator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
@@ -127,12 +127,7 @@ def get_mul_label(wikibase_id: str) -> str:
 
     resp = wikidata_get(
         'https://www.wikidata.org/w/api.php',
-        params={
-            'action': 'wbgetentities',
-            'ids': wikibase_id,
-            'props': 'labels',
-            'languages': 'mul',
-            'format': 'json'}
+        params={'action': 'wbgetentities', 'ids': wikibase_id, 'props': 'labels', 'languages': 'mul', 'format': 'json'},
     )
 
     resp.raise_for_status()
@@ -172,7 +167,7 @@ def is_current(mtime: float, data: dict) -> bool:
     data : Data as returned from wptools.
     """
 
-    return datetime.fromtimestamp(mtime, tz=timezone.utc) > parsedate(data['modified']['wikidata'])
+    return datetime.fromtimestamp(mtime, tz=UTC) > parsedate(data['modified']['wikidata'])
 
 
 def records(result: str, format_: str) -> Iterator[list]:
@@ -208,10 +203,8 @@ def wikibase_ids(values: list) -> list[str]:
 
 
 def wikidata_get(
-        url: str,
-        params: dict | None = None,
-        headers: dict | None = None,
-        timeout: float | None = None) -> httpx.Response:
+    url: str, params: dict | None = None, headers: dict | None = None, timeout: float | None = None
+) -> httpx.Response:
     """
     Wrapper around httpx.get ensuring Wikimedia User-Agent Policy compliance.
     """
